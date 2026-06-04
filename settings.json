@@ -1,0 +1,22 @@
+{
+  "system_name": "Agent-OS v1",
+  "version": "1.0.0",
+  "default_model": "claude-3-5-sonnet-20241022",
+  "fallback_models": [
+    "claude-3-opus-20240229",
+    "gpt-4o"
+  ],
+  "max_agents": 20,
+  "memory_retention_days": 365,
+  "enable_self_improvement": true,
+  "async_mode": true,
+  "log_level": "INFO",
+  "security": {
+    "require_approval_for_tools": ["finance", "legal", "deployments"],
+    "sandbox_enabled": true
+  },
+  "observability": {
+    "metrics_enabled": true,
+    "tracing": true
+  }
+}

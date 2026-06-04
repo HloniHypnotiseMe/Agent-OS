@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  agent-os:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - AGENT_OS_ENV=production
+    volumes:
+      - ./memory_store.json:/app/memory_store.json
+    restart: unless-stopped
+
+  # Future: redis for memory, etc.

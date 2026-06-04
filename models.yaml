@@ -1,0 +1,56 @@
+# Agent-OS Model Configuration
+# YAML format for model routing and capabilities
+
+default:
+  provider: anthropic
+  model: claude-3-5-sonnet-20241022
+  max_tokens: 8192
+  temperature: 0.7
+
+models:
+  - name: claude-3-5-sonnet-20241022
+    provider: anthropic
+    capabilities:
+      - reasoning
+      - coding
+      - long_context
+      - tool_use
+    cost_per_1k_tokens: 0.003
+    context_window: 200000
+
+  - name: claude-3-opus-20240229
+    provider: anthropic
+    capabilities:
+      - complex_reasoning
+      - creative
+    cost_per_1k_tokens: 0.015
+    context_window: 200000
+    fallback: true
+
+  - name: gpt-4o
+    provider: openai
+    capabilities:
+      - vision
+      - fast_response
+      - tool_use
+    cost_per_1k_tokens: 0.005
+    context_window: 128000
+
+  - name: local-llama
+    provider: local
+    model_path: ./models/llama-3-70b.gguf
+    capabilities:
+      - privacy
+      - offline
+    cost_per_1k_tokens: 0
+    context_window: 8192
+
+routing_rules:
+  - task: "high_stakes_decision"
+    prefer: claude-3-opus-20240229
+  - task: "code_generation"
+    prefer: claude-3-5-sonnet-20241022
+  - task: "quick_response"
+    prefer: gpt-4o
+  - task: "sensitive_data"
+    prefer: local-llama
