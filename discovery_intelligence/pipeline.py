@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 from hashlib import sha256
-from typing import Any, Callable, Dict, Iterable, List
+from typing import Any, Callable, Dict, List
 from urllib.parse import urlparse
 
 from .models import BusinessIntelligenceRecord, Evidence, Inference, Offer
@@ -28,14 +28,21 @@ class DiscoveryIntelligencePipeline:
         seed = f"{url}|{datetime.now(timezone.utc).date().isoformat()}"
         return "research_" + sha256(seed.encode("utf-8")).hexdigest()[:12]
 
+    @staticmethod
+    def _validate_depth(depth: str) -> None:
+        if depth not in {"standard", "deep"}:
+            raise ValueError("depth must be 'standard' or 'deep'")
+
     def research(self, url: str, depth: str = "standard") -> BusinessIntelligenceRecord:
         if not url.startswith(("http://", "https://")):
             raise ValueError("business URL must use http:// or https://")
+        self._validate_depth(depth)
 
         business_id = self._business_id(url)
         run_id = self._run_id(url)
         host = urlparse(url).netloc.lower().removeprefix("www.")
-        results = self.web_search(f'"{host}" business', num_results=8)
+        num_results = 12 if depth == "deep" else 8
+        results = self.web_search(f'"{host}" business', num_results=num_results)
         if not results:
             raise ValueError("research returned no evidence")
 
@@ -52,62 +59,52 @@ class DiscoveryIntelligencePipeline:
             )
         ]
 
+        inferred_name = ""
+        inference_sources: List[str] = []
         for result in results:
             source_url = result.get("url", "")
             if not source_url:
                 continue
+            title = result.get("title", "")
+            snippet = result.get("snippet", "")
             evidence.append(
                 Evidence(
                     field="research_signal",
-                    value={
-                        "title": result.get("title", ""),
-                        "snippet": result.get("snippet", ""),
-                    },
+                    value={"title": title, "snippet": snippet},
                     source_url=source_url,
-                    source_title=result.get("title", ""),
+                    source_title=title,
                     observed_at=now,
                     confidence=0.70,
                     verification_status="corroborated",
                 )
             )
+            if not inferred_name and title:
+                inferred_name = title
+            inference_sources.append(source_url)
 
-        identity = {
-            "website": url,
-            "domain": host,
-            "name": host.split(".")[0].replace("-", " ").title(),
-        }
-        name_evidence = Evidence(
-            field="name",
-            value=identity["name"],
-            source_url=url,
-            source_title=host,
-            observed_at=now,
-            confidence=0.60,
-            evidence_type="inference_support",
-            verification_status="unverified",
-        )
-        evidence.append(name_evidence)
+        identity = {"website": url, "domain": host}
+        inferences = []
+        if inferred_name:
+            inferences.append(
+                Inference(
+                    field="business_identity",
+                    conclusion=inferred_name,
+                    supporting_evidence=inference_sources[:5],
+                    confidence=0.60,
+                )
+            )
 
         return BusinessIntelligenceRecord(
             business_id=business_id,
             identity=identity,
             evidence=evidence,
-            inferences=[
-                Inference(
-                    field="business_identity",
-                    conclusion=identity["name"],
-                    supporting_evidence=[url],
-                    confidence=0.60,
-                )
-            ],
+            inferences=inferences,
             research_run_id=run_id,
         )
 
     @staticmethod
     def score(record: BusinessIntelligenceRecord) -> BusinessIntelligenceRecord:
-        signals = " ".join(
-            str(item.value).lower() for item in record.evidence
-        )
+        signals = " ".join(str(item.value).lower() for item in record.evidence)
         score = 50
         for keyword, weight in {
             "restaurant": 10,
@@ -153,7 +150,8 @@ class DiscoveryIntelligencePipeline:
             business_id=record.business_id,
             recommendation=recommendation,
             deliverables=deliverables,
-            price_minor=250000 if score >= 70 else 125000,
+            price_minor=0,
+            pricing_status="unvalidated",
         )
         return record
 
