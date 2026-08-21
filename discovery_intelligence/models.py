@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Literal, Optional
 
 EvidenceType = Literal["source", "observation", "inference_support"]
 VerificationStatus = Literal["unverified", "corroborated", "verified"]
+PricingStatus = Literal["unvalidated", "validated"]
 
 
 @dataclass(frozen=True)
@@ -23,6 +24,8 @@ class Evidence:
             raise ValueError("confidence must be between 0 and 1")
         if not self.source_url:
             raise ValueError("source_url is required for evidence")
+        if not self.source_url.startswith(("http://", "https://")):
+            raise ValueError("source_url must use http:// or https://")
 
 
 @dataclass(frozen=True)
@@ -47,6 +50,7 @@ class Offer:
     currency: str = "ZAR"
     billing_period: str = "once"
     payment_provider: str = "RemotePay"
+    pricing_status: PricingStatus = "unvalidated"
     checkout_reference: Optional[str] = None
 
 
