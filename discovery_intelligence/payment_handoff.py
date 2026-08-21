@@ -1,6 +1,5 @@
 """Commercial handoff contract for the existing RemotePay payment API."""
 
-from dataclasses import asdict
 from typing import Any, Dict
 
 from .models import Offer
@@ -9,10 +8,8 @@ from .models import Offer
 class RemotePayHandoff:
     """Translate a validated C6 offer into RemotePay's PaymentCreate shape.
 
-    This deliberately does not call the payment service. RemotePay currently
-    exposes POST /payments and owns the transaction/PayFast execution path.
-    Keeping this boundary pure makes the intelligence layer testable and keeps
-    payment credentials and provider state out of discovery.
+    This deliberately does not call the payment service. RemotePay exposes
+    POST /payments and owns the transaction/PayFast execution path.
     """
 
     endpoint = "/payments"
@@ -29,6 +26,8 @@ class RemotePayHandoff:
             raise ValueError("customer_id is required")
         if not return_url or not cancel_url:
             raise ValueError("return_url and cancel_url are required")
+        if offer.pricing_status != "validated":
+            raise ValueError("offer pricing must be validated before payment handoff")
         if offer.price_minor <= 0:
             raise ValueError("offer price must be positive")
 
