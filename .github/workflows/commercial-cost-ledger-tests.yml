@@ -17,4 +17,4 @@ jobs:
       - name: Install test dependency
         run: python -m pip install pytest
       - name: Run commercial cost ledger tests
-        run: python -m pytest tests/test_cost_ledger.py -q
+        run: python -m pytest tests/test_cost_ledger.py tests/test_usage_hooks.py tests/test_commercial_delivery_instrumentation.py -q
