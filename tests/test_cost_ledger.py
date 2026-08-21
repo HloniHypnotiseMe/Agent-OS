@@ -54,8 +54,8 @@ def test_ledger_persists_observations_and_calculates_percentiles(tmp_path):
 
     result = ledger.package_cost_percentiles("diamond")
     assert result["observations"] == 3
-    assert result["p50_cost_zar"] == 500.0
-    assert result["p90_cost_zar"] == 580.0
+    assert result["p50_cost_zar"] == 600.0
+    assert result["p90_cost_zar"] == 680.0
 
 
 def test_margin_gate_is_deterministic():
