@@ -17,6 +17,8 @@
 - [x] Cost-event normalization and aggregation tests implemented
 - [x] Actual AI/LLM usage events wired (Ollama)
 - [x] Actual research/search usage events wired
+- [x] Enrichment usage hook generated and tested
+- [x] Email/outreach usage hook generated and tested
 
 ## Current phase — COST LEDGER
 
@@ -28,8 +30,10 @@
 - [x] Implement event aggregation into package observations
 - [x] Wire actual AI/LLM usage events
 - [x] Wire actual research/search usage events
-- [ ] Wire actual enrichment usage events
-- [ ] Wire actual email/outreach usage events
+- [x] Generate enrichment usage instrumentation boundary
+- [x] Generate email/outreach usage instrumentation boundary
+- [ ] Wire enrichment hook into the real provider execution path
+- [ ] Wire outreach hook into the real provider execution path
 - [ ] Wire actual hosting/runtime usage events
 - [ ] Wire actual payment-cost events
 - [ ] Wire actual human delivery/support time
