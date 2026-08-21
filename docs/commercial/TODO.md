@@ -15,6 +15,8 @@
 - [x] Automated CI test gate added for the cost ledger
 - [x] Provider-agnostic cost event schema/recorder implemented
 - [x] Cost-event normalization and aggregation tests implemented
+- [x] Actual AI/LLM usage events wired (Ollama)
+- [x] Actual research/search usage events wired
 
 ## Current phase — COST LEDGER
 
@@ -24,8 +26,8 @@
 - [x] Define normalized provider cost-event contract
 - [x] Implement cost-event validation and source attribution
 - [x] Implement event aggregation into package observations
-- [ ] Wire actual AI/LLM usage events
-- [ ] Wire actual research/search usage events
+- [x] Wire actual AI/LLM usage events
+- [x] Wire actual research/search usage events
 - [ ] Wire actual enrichment usage events
 - [ ] Wire actual email/outreach usage events
 - [ ] Wire actual hosting/runtime usage events
