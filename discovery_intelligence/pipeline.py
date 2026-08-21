@@ -2,8 +2,8 @@
 
 from datetime import datetime, timezone
 from hashlib import sha256
-from typing import Any, Callable, Dict, List
-from urllib.parse import urlparse
+from typing import Any, Callable, Dict, List, Optional
+from urllib.parse import parse_qs, unquote, urljoin, urlparse
 
 from .models import BusinessIntelligenceRecord, Evidence, Inference, Offer
 
@@ -32,6 +32,30 @@ class DiscoveryIntelligencePipeline:
     def _validate_depth(depth: str) -> None:
         if depth not in {"standard", "deep"}:
             raise ValueError("depth must be 'standard' or 'deep'")
+
+    @staticmethod
+    def _normalize_source_url(source_url: str) -> Optional[str]:
+        """Normalize common DuckDuckGo href forms to an HTTP(S) source URL."""
+        if not source_url:
+            return None
+        if source_url.startswith(("http://", "https://")):
+            return source_url
+        if source_url.startswith("//"):
+            source_url = "https:" + source_url
+        elif source_url.startswith("/"):
+            source_url = urljoin("https://duckduckgo.com", source_url)
+        else:
+            return None
+
+        parsed = urlparse(source_url)
+        if parsed.netloc == "duckduckgo.com" and parsed.path.startswith("/l/"):
+            target = parse_qs(parsed.query).get("uddg", [None])[0]
+            if target:
+                target = unquote(target)
+                if target.startswith(("http://", "https://")):
+                    return target
+                return None
+        return source_url if parsed.scheme in {"http", "https"} and parsed.netloc else None
 
     def research(self, url: str, depth: str = "standard") -> BusinessIntelligenceRecord:
         if not url.startswith(("http://", "https://")):
@@ -62,7 +86,7 @@ class DiscoveryIntelligencePipeline:
         inferred_name = ""
         inference_sources: List[str] = []
         for result in results:
-            source_url = result.get("url", "")
+            source_url = self._normalize_source_url(result.get("url", ""))
             if not source_url:
                 continue
             title = result.get("title", "")
