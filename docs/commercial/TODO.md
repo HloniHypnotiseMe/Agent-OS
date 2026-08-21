@@ -19,6 +19,8 @@
 - [x] Actual research/search usage events wired
 - [x] Enrichment usage hook generated and tested
 - [x] Email/outreach usage hook generated and tested
+- [x] Enrichment hook wired into ResearcherAgent web-search execution
+- [x] Outreach hook wired into SalesAgent send_outreach execution
 
 ## Current phase — COST LEDGER
 
@@ -32,8 +34,8 @@
 - [x] Wire actual research/search usage events
 - [x] Generate enrichment usage instrumentation boundary
 - [x] Generate email/outreach usage instrumentation boundary
-- [ ] Wire enrichment hook into the real provider execution path
-- [ ] Wire outreach hook into the real provider execution path
+- [x] Wire enrichment hook into the real provider execution path
+- [x] Wire outreach hook into the real provider execution path
 - [ ] Wire actual hosting/runtime usage events
 - [ ] Wire actual payment-cost events
 - [ ] Wire actual human delivery/support time
