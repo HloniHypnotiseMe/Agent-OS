@@ -9,6 +9,9 @@ Approved to generate missing cost instrumentation rather than wait for provider 
 - Added `commercial/usage_hooks.py` with standardized enrichment and email/outreach telemetry boundaries.
 - Added `tests/test_usage_hooks.py` covering both hooks, JSONL persistence, units, and the missing-cost rule.
 - Updated `docs/commercial/TODO.md` to distinguish generated instrumentation from real provider wiring.
+- Wired `ResearcherAgent.perform_research()` to emit an enrichment usage event after each successful web-search result.
+- Wired `SalesAgent.send_outreach()` to emit an outreach usage event after successful `send_email` execution.
+- Added `tests/test_commercial_delivery_instrumentation.py` covering both real agent execution paths with controlled fake providers.
 
 ### Important accounting rule
 The hooks record usage immediately, but **do not invent monetary cost**. `cost_zar` remains unknown (`None`) until a real provider exposes or supplies an attributable cost. This preserves the existing margin-accounting rule and prevents false economics.
@@ -16,17 +19,21 @@ The hooks record usage immediately, but **do not invent monetary cost**. `cost_z
 ### Current status
 - Enrichment instrumentation boundary: COMPLETE
 - Outreach instrumentation boundary: COMPLETE
-- Real enrichment provider wiring: PENDING
-- Real outreach provider wiring: PENDING
+- Research execution wiring: COMPLETE
+- Outreach execution wiring: COMPLETE
+- Real external provider cost attribution: PENDING
 - First 10 controlled observations: PENDING
 - P50/P90 from observed package costs: PENDING
 - Margin validation: PENDING
 
 ### Why this decision
-The repository already has a provider-agnostic usage contract and JSONL sink. The missing capability was the explicit commercial capability boundary for enrichment and outreach. Creating that boundary now allows real providers to be connected without redesigning the ledger later.
+The repository already has a provider-agnostic usage contract and JSONL sink. The missing capability was the explicit commercial capability boundary for enrichment and outreach. Creating the boundary first, then wiring it into the existing Researcher and Sales execution points, lets the economics ledger observe real execution without inventing provider pricing.
+
+### Evidence boundary
+Research currently uses the existing `web_search` tool and records one enrichment event per returned external result. Sales now has an explicit `send_outreach()` execution path that requires a configured `send_email` tool and records usage only after that call returns successfully. No external provider cost is assumed.
 
 ### Next execution target
-Connect these hooks at the actual enrichment and outreach execution points, then run controlled observations. Do not mark real provider wiring complete until tests demonstrate events emitted by real execution paths.
+Run the repository test suite on `feat/commercial-cost-instrumentation`. Then connect the `send_email` tool to the real deliverability provider when available and collect the first 10 controlled observations. Do not mark cost attribution or pricing validation complete until observed provider costs exist.
 
 ---
 
